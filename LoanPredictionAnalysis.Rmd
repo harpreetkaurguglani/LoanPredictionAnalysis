@@ -1,0 +1,343 @@
+---
+title: "LoanPredictionAnalysis"
+author: "Harpreet Kaur"
+date: "26/12/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+```
+
+
+```{r}
+#Dataset Read
+data1=read.csv("train_data.csv",header = TRUE)
+#head(data)
+```
+
+```{r}
+test_data1=read.csv("test_data.csv",header = TRUE)
+#str(test_data)
+```
+
+
+
+
+```{r}
+totalincometrain = data1$ApplicantIncome + data1$CoapplicantIncome
+totalincometest = test_data1$ApplicantIncome + test_data1$CoapplicantIncome
+
+data = cbind(data1, totalincometrain)
+data=data[,c(-7,-8,-1)]
+test_data = cbind(test_data1, totalincometest)
+test_data=test_data[,c(-7,-8,-1)]
+```
+
+```{r}
+
+getmode <- function(v) {
+   uniqv <- na.omit(unique(v))
+   uniqv[which.max(tabulate(match(v, uniqv)))]
+}
+
+```
+
+
+```{r}
+#names(data)
+#summary(data)
+str(data)
+```
+
+```{r}
+sum(is.na(data))
+```
+
+```{r}
+barplot(table(data$Dependents))
+```
+```{r}
+unique(data$Dependents)
+```
+### Filling up categorical empty cell
+```{r}
+data$Dependents = ifelse((data$Dependents==""),getmode(data$Dependents),data$Dependents)
+data$Dependents=factor(data$Dependents,levels=c('0','1','2','3+'), labels = c(0,1,2,3))
+data$Dependents = as.numeric(data$Dependents)
+```
+
+
+```{r}
+unique(data$Dependents)
+#barplot(table(data$Dependents))
+#data$Dependents <- revalue(data$Dependents, c("3+"="3"))
+```
+
+```{r}
+data$Gender = ifelse((data$Gender==""),getmode(data$Gender),data$Gender)
+data$Gender<-as.factor(data$Gender)
+data$Gender<-as.numeric(data$Gender)
+data$Married = ifelse((data$Married==""),getmode(data$Married),data$Married)
+data$Married<-as.factor(data$Married)
+data$Self_Employed = ifelse((data$Self_Employed==""),getmode(data$Self_Employed),data$Self_Employed)
+data$Self_Employed<-as.factor(data$Self_Employed)
+```
+
+```{r}
+data$Married = factor(data$Married, levels = c('Yes','No'), labels = c(0,1))
+data$Education = factor(data$Education, levels = c('Graduate','Not Graduate'), labels = c(0,1))
+data$Self_Employed = factor(data$Self_Employed, levels = c('No','Yes'), labels = c(0,1))
+data$Property_Area=factor(data$Property_Area,levels=c('Rural','Semiurban', 'Urban'), labels = c(0,1,2))
+
+data$Married = as.numeric(data$Married)
+data$Education = as.numeric(data$Education)
+data$Self_Employed = as.numeric(data$Self_Employed)
+data$Property_Area = as.numeric(data$Property_Area)
+```
+
+### Filling up numerical empty cell
+
+```{r}
+#barplot(table(data$Credit_History))
+data$Credit_History=ifelse(is.na(data$Credit_History),getmode(data$Credit_History),data$Credit_History)
+data$Credit_History=factor(data$Credit_History,levels=c("0","1"),labels = c(0,1))
+data$Credit_History = as.numeric(data$Credit_History)
+
+data$Loan_Amount_Term=ifelse(is.na(data$Loan_Amount_Term),getmode(data$Loan_Amount_Term),data$Loan_Amount_Term)
+```
+
+```{r}
+data$Loan_Status<-factor(data$Loan_Status, levels = c('N','Y'), labels = c(0,1))
+#data$Loan_Status = as.numeric(data$Loan_Status)
+```
+
+```{r}
+data$LoanAmount=ifelse(is.na(data$LoanAmount),mean(data$LoanAmount,na.rm = TRUE),data$LoanAmount)
+```
+
+
+```{r}
+data[,6:9] = scale(data[,6:9])
+```
+
+###################### test data ############################
+
+### Filling up categorical empty cell
+```{r}
+test_data$Dependents = ifelse((test_data$Dependents==""),getmode(test_data$Dependents),test_data$Dependents)
+test_data$Dependents=factor(test_data$Dependents,levels=c('0','1','2','3+'), labels = c(0,1,2,3))
+test_data$Dependents = as.numeric(test_data$Dependents)
+
+test_data$Gender = ifelse((test_data$Gender==""),getmode(test_data$Gender),test_data$Gender)
+test_data$Gender<-as.factor(test_data$Gender)
+test_data$Married = ifelse((test_data$Married==""),getmode(test_data$Married),test_data$Married)
+test_data$Married<-as.factor(test_data$Married)
+test_data$Self_Employed = ifelse((test_data$Self_Employed==""),getmode(test_data$Self_Employed),test_data$Self_Employed)
+test_data$Self_Employed<-as.factor(test_data$Self_Employed)
+
+test_data$Married = factor(test_data$Married, levels = c('Yes','No'), labels = c(0,1))
+test_data$Education = factor(test_data$Education, levels = c('Graduate','Not Graduate'), labels = c(0,1))
+test_data$Self_Employed = factor(test_data$Self_Employed, levels = c('No','Yes'), labels = c(0,1))
+test_data$Property_Area=factor(test_data$Property_Area,levels=c('Rural','Semiurban', 'Urban'), labels = c(0,1,2))
+test_data$Gender<-as.numeric(test_data$Gender)
+test_data$Married = as.numeric(test_data$Married)
+test_data$Education = as.numeric(test_data$Education)
+test_data$Self_Employed = as.numeric(test_data$Self_Employed)
+test_data$Property_Area = as.numeric(test_data$Property_Area)
+
+#barplot(table(data$Credit_History))
+test_data$Credit_History=ifelse(is.na(test_data$Credit_History),getmode(test_data$Credit_History),test_data$Credit_History)
+test_data$Credit_History=factor(test_data$Credit_History,levels=c("0","1"), labels = c(0,1))
+test_data$Credit_History = as.numeric(test_data$Credit_History)
+
+test_data$Loan_Amount_Term=ifelse(is.na(test_data$Loan_Amount_Term),getmode(test_data$Loan_Amount_Term),test_data$Loan_Amount_Term)
+test_data$LoanAmount=ifelse(is.na(test_data$LoanAmount),mean(test_data$LoanAmount,na.rm = TRUE),test_data$LoanAmount)
+test_data[, 6:9] = scale(test_data[, 6:9])
+```
+
+###################ANALYSIS#######################
+
+## Split the dataset
+
+```{r}
+sample <- sample.int(n = nrow(data), size = floor(.70*nrow(data)), replace = F)
+trainnew <- data[sample, ]
+testnew  <- data[-sample, ]
+
+```
+
+## Logistic Regression
+
+
+```{r}
+model_glm=glm(formula = (Loan_Status) ~ Credit_History + Education + Self_Employed + Property_Area + LoanAmount + totalincometrain, family = binomial,data = data)
+```
+
+```{r}
+plot(model_glm)
+```
+
+
+```{r}
+model_glm
+```
+
+```{r}
+library(caTools)
+```
+```{r}
+prob_predlog = predict(model_glm, type = 'response', newdata = test_data)
+Loan_Statuslog = ifelse(prob_predlog>0.5, 1,0)
+Loan_Status = ifelse(Loan_Statuslog == 1, "Y","N")
+Logresult = cbind( test_data$Loan_ID, Loan_Status)
+head(Logresult)
+```
+
+###### MSE 
+
+```{r}
+train_glm=glm(formula = (Loan_Status) ~ Credit_History + Education + Self_Employed + Property_Area + LoanAmount + totalincometrain, family = binomial,data = trainnew)
+```
+```{r}
+lm.pred = predict(train_glm, testnew)
+y_pred = ifelse(lm.pred > 0.5, 1, 0)
+
+library(caret)
+cm = table(ActualValue=testnew$Loan_Status, PredictedValue=lm.pred > 0.5)
+cm
+#Estimating the percentage of performance
+sum(diag(cm))/sum(cm)
+```
+
+### rpart
+
+```{r}
+library(rpart)
+# grow tree 
+dtree <- rpart(Loan_Status~Credit_History+Education+Self_Employed+Property_Area+LoanAmount+totalincometrain,method="class", data=data,parms=list(split="information"))
+dtree$cptable
+```
+
+```{r}
+plotcp(dtree)
+dtree$cptable[which.min(dtree$cptable[,"xerror"]),"CP"]
+```
+
+```{r}
+dtree.pruned <- prune(dtree, cp=.01302083)
+library(rpart.plot)
+prp(dtree.pruned, type = 2, extra = 106,fallen.leaves = TRUE, main="Decision Tree")
+
+```
+
+```{r}
+dtree.pred <- predict(dtree.pruned, data, type="class")
+dtree.perf <- table(data$Loan_Status, dtree.pred,dnn=c("Actual", "Predicted"))
+dtree.perf
+```
+###### MSE 
+
+```{r}
+train_tree <- rpart(Loan_Status~Credit_History+Education+Self_Employed+Property_Area+LoanAmount+totalincometrain,method="class", data=trainnew,parms=list(split="information"))
+
+tree.pred = predict(train_tree, testnew)
+#y_pred = ifelse(lm.pred > 0.5, 1, 0)
+
+library(caret)
+cm = table(ActualValue=testnew$Loan_Status, PredictedValue=tree.pred)
+cm
+#Estimating the percentage of performance
+sum(diag(cm))/sum(cm)
+```
+
+
+```{r}
+#test12<-test12[,c(-11)]
+names(test_data)[names(test_data) == 'totalincometest'] <- 'totalincometrain'
+```
+
+## Random forest
+```{r}
+library(randomForest)
+rf_tree=randomForest(Loan_Status ~ ., data = data)
+y_pred = predict(rf_tree, newdata = test_data)
+```
+
+```{r}
+varImpPlot(rf_tree)
+```
+
+
+###### MSE
+
+```{r}
+rf_tree=randomForest(Loan_Status ~ ., data = trainnew)
+rf_pred = predict(rf_tree,testnew)
+
+library(caret)
+confusionMatrix(rf_pred,testnew$Loan_Status)
+```
+
+
+## KNN
+
+```{r}
+library(class)
+cl = data[,9]
+y_pred = knn(train = data[-9],test = test_data,cl,k = 5)
+
+Loanyandn = ifelse(y_pred == 1, "Y","N")
+Logresult = cbind(test_data$LoanID, Loanyandn)
+head(Logresult)
+write.csv(Logresult, file = "FinalknnTree.csv")
+```
+
+
+###### MSE
+
+```{r}
+knn_model = knn(train = trainnew[-9],test = testnew,cl,k = 5)
+knn_pred = predict(knn_model,testnew)
+
+library(caret)
+confusionMatrix(knn_pred,testnew$Loan_Status)
+```
+
+
+
+
+
+### Lasso
+
+```{r}
+x<-data.frame(data[c(-11,-10)]+data1$ApplicantIncome+data1$CoapplicantIncome)
+x1=model.matrix((data$Loan_Status)~x)
+y<-data[10]
+library(glmnet)
+cv.lasso = cv.glmnet(x1, data$Loan_Status, alpha=1)
+par(mfrow=c(1,1))
+bestlam =cv.lasso$lambda.min
+lam1se =cv.lasso$lambda.1se
+bestlam
+```
+
+```{r}
+data_lasso=cbind(data,data1$ApplicantIncome,data1$CoapplicantIncome)
+x.train = model.matrix(Loan_Status ~. , data_lasso)[,-1]
+y.train = as.numeric(data$Loan_Status)
+
+cv.lasso = cv.glmnet(x.train, y.train, alpha=1)
+par(mfrow=c(1,1))
+bestlam =cv.lasso$lambda.min
+lam1se =cv.lasso$lambda.1se
+bestlam
+plot(cv.lasso)
+```
+
+```{r}
+lasso.best = glmnet(x.train, y.train, alpha=1, lambda=bestlam)
+
+```
+
