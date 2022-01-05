@@ -24,5 +24,5 @@ The best accuracy on public test set is 0.8216216. Applicants with credit histor
 
 The Random Forest suggests that the variable Credit_History, totalincometrain, LoanAmount are crucial variables. The variables Married, Education, Gender and Self_Employed can be omitted from the analysis. The Lasso model also concludes by evaluating 5variables for low MSE. The error rate with Random forest is 19.11% and the accuracy for the validation set is 81%.
 
-Chosen Model & Scoring
+## Discussion
 Although the accuracy for the decision tree is better, I'm choosing the random forest tree model. The reason is that the difference in accuracy slightly differ between the two models. 
